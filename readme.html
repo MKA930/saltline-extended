@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saltline · Extended — 说明 / README</title>
+<style>
+  :root{
+    --bg:#10131a; --panel:#171c26; --ink:#e8e4da; --muted:#9aa3b2;
+    --accent:#e26b4a; --line:rgba(232,228,218,.16);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.7 -apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:880px;margin:0 auto;padding:28px 20px 64px}
+  header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
+    border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:22px}
+  h1{font-size:26px;margin:0;letter-spacing:.5px}
+  h2{font-size:20px;margin:30px 0 10px;color:#fff;border-left:4px solid var(--accent);padding-left:10px}
+  p{color:var(--ink)} .muted{color:var(--muted)}
+  a{color:#7fb2ff;text-decoration:none} a:hover{text-decoration:underline}
+  .toggle{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .toggle button{background:transparent;color:var(--muted);border:0;padding:8px 18px;font-size:14px;cursor:pointer}
+  .toggle button.on{background:var(--accent);color:#fff}
+  table{border-collapse:collapse;width:100%;margin:14px 0}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:center;vertical-align:middle}
+  th{background:var(--panel);color:#fff}
+  img{max-width:100%;border:1px solid var(--line);border-radius:8px;margin-top:6px}
+  code{background:var(--panel);padding:2px 6px;border-radius:5px;font-size:13px}
+  pre{background:var(--panel);padding:14px;border:1px solid var(--line);border-radius:8px;overflow:auto}
+  pre code{background:none;padding:0}
+  .sec{display:none} .sec.show{display:block}
+  .lang-hint{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Saltline · Extended</h1>
+      <div class="lang-hint">盐线 · 扩展版 — 基于 Felix Rieseberg 公开作品《Saltline》的本地化与功能扩展</div>
+    </div>
+    <div class="toggle" id="tg">
+      <button data-lang="zh" class="on">中文</button>
+      <button data-lang="en">English</button>
+    </div>
+  </header>
+
+  <!-- ===================== 中文 ===================== -->
+  <section class="sec show" data-lang="zh">
+    <h2>这是什么</h2>
+    <p>《Saltline》是一款用纯 HTML / Three.js 实现的 3D 第一人称港务突防小游戏。本仓库在原版基础上：</p>
+    <ul>
+      <li><b>本地化</b>：主菜单增加语言切换按钮，默认中文，可一键切换英文；署名说明随语言切换。</li>
+      <li><b>无敌模式</b>：主菜单增加「无敌模式」开关，开启后受到攻击不触发死亡（保留受击反馈）。</li>
+      <li><b>功能扩展</b>（仅提取需要的增量）：九把枪、叉车 / 牵引 / 快艇 / 隐身战机、外海与空战、海上首领「铁壁号」、三张新地图、手机触屏修复。</li>
+    </ul>
+    <p>原版是 <b>Felix Rieseberg</b>（<a href="https://x.com/felixrieseberg" target="_blank" rel="noopener">@felixrieseberg</a>）在 Claude 上发布的公开作品，本仓库以其为基底。功能扩展部分参考了 <b>X_mason13</b>（<a href="https://x.com/X_mason13" target="_blank" rel="noopener">@X_mason13</a>）的二开版本，但<b>未沿用其宣传改名</b>（如「Aggie速记英语 3A大作」），标题仍保持 <code>Saltline</code>。</p>
+
+    <h2>在线试玩</h2>
+    <p>游戏：<a href="./">https://MKA930.github.io/saltline-extended/</a></p>
+
+    <h2>截图</h2>
+    <table>
+      <tr><th>主菜单（中文）</th><th>主菜单（英文）</th><th>游戏内（中文）</th></tr>
+      <tr>
+        <td><img src="assets/preview-menu-zh.png" alt="主菜单中文"></td>
+        <td><img src="assets/preview-menu-en.png" alt="主菜单英文"></td>
+        <td><img src="assets/preview-game-zh.png" alt="游戏内中文"></td>
+      </tr>
+    </table>
+
+    <h2>本地运行</h2>
+    <p>双击 <code>index.html</code> 即可离线运行（无需服务器、无需联网）。</p>
+
+    <h2>从源码重新构建</h2>
+    <p><code>index.html</code> 由可复现脚本生成。本仓库为精简交付，只保留构建产物与构建脚本：</p>
+    <pre><code>python build.py            # 输出 index.html
+node --check i18n.source.js   # 语法校验</code></pre>
+    <ul>
+      <li><code>build.py</code>：以原版英文基底为 BASE，从参考版抽取第 2 个 <code>&lt;style&gt;</code> 与第 2 个 <code>&lt;script&gt;</code>（V2~V9 扩展增量），叠加语言切换 / 无敌模式 / 署名说明，并做品牌清理与扩展兼容性垫片。</li>
+      <li><code>i18n.source.js</code>：菜单 DOM 本地化层（中英双向字典 + 运行时 <code>MutationObserver</code> 监听），会被 <code>build.py</code> 内联进 <code>index.html</code>。</li>
+    </ul>
+
+    <h2>已知限制</h2>
+    <p>原版把武器伤害 / 射速定义为只读 getter，「战场强化」中的伤害与射速升级无法写回原版引擎（弹匣容量、武器名可以）。这是原版引擎本身的限制，不影响九把枪切换、载具、空战与首领战。</p>
+
+    <h2>许可</h2>
+    <p>MIT License。Copyright (c) 2026 Winston (MKA930)。原作品版权归 Felix Rieseberg 所有；本仓库包含对其作品的修改与扩展。详见 <a href="LICENSE">LICENSE</a>。</p>
+  </section>
+
+  <!-- ===================== English ===================== -->
+  <section class="sec" data-lang="en">
+    <h2>What this is</h2>
+    <p><i>Saltline</i> is a 3D first-person port-breaching game built as a single HTML file with Three.js. This repository extends the original:</p>
+    <ul>
+      <li><b>Localization</b>: a language switch on the main menu (Chinese by default, one-click to English); the attribution note switches with it.</li>
+      <li><b>God mode</b>: a toggle on the main menu; when on, taking damage does not trigger death (hit feedback is preserved).</li>
+      <li><b>Feature extensions</b> (only the needed increment): nine weapons, forklift / towing / speedboat / stealth jet, open-sea and air combat, the boss ship "Ironwall", three new maps, and fixed touch controls.</li>
+    </ul>
+    <p>The base is the publicly shared Claude artifact <b>"Saltline"</b> by <b>Felix Rieseberg</b> (<a href="https://x.com/felixrieseberg" target="_blank" rel="noopener">@felixrieseberg</a>). The feature extensions reference the second-dev (fork) version by <b>X_mason13</b> (<a href="https://x.com/X_mason13" target="_blank" rel="noopener">@X_mason13</a>), but this repo does <b>not</b> adopt its rebranding (e.g. "Aggie速记英语 3A大作") — the title stays <code>Saltline</code>.</p>
+
+    <h2>Play online</h2>
+    <p>Game: <a href="./">https://MKA930.github.io/saltline-extended/</a></p>
+
+    <h2>Screenshots</h2>
+    <table>
+      <tr><th>Menu (Chinese)</th><th>Menu (English)</th><th>In-game (Chinese)</th></tr>
+      <tr>
+        <td><img src="assets/preview-menu-zh.png" alt="Menu Chinese"></td>
+        <td><img src="assets/preview-menu-en.png" alt="Menu English"></td>
+        <td><img src="assets/preview-game-zh.png" alt="In-game Chinese"></td>
+      </tr>
+    </table>
+
+    <h2>Run locally</h2>
+    <p>Double-click <code>index.html</code> — it runs fully offline (no server, no network).</p>
+
+    <h2>Rebuild from source</h2>
+    <p><code>index.html</code> is produced by a reproducible script. This repo ships a trimmed deliverable — only the build output and the build script:</p>
+    <pre><code>python build.py            # emits index.html
+node --check i18n.source.js   # syntax check</code></pre>
+    <ul>
+      <li><code>build.py</code>: uses the original English base, extracts the 2nd <code>&lt;style&gt;</code> and 2nd <code>&lt;script&gt;</code> (the V2–V9 extension increment) from the reference build, layers on language switch / god mode / attribution, and applies debranding plus an extension-compatibility shim.</li>
+      <li><code>i18n.source.js</code>: the menu DOM localization layer (bidirectional CN/EN dictionary + runtime <code>MutationObserver</code>); <code>build.py</code> inlines it into <code>index.html</code>.</li>
+    </ul>
+
+    <h2>Known limitations</h2>
+    <p>The original defines weapon damage / fire-rate as read-only getters, so the "field upgrades" for damage and fire-rate cannot be written back to the original engine (magazine size and weapon name can). This is a limitation of the original engine and does not affect weapon switching, vehicles, air combat, or the boss fight.</p>
+
+    <h2>License</h2>
+    <p>MIT License. Copyright (c) 2026 Winston (MKA930). The original work is © Felix Rieseberg; this repository contains modifications and extensions of it. See <a href="LICENSE">LICENSE</a>.</p>
+  </section>
+</div>
+<script>
+  (function(){
+    var tg = document.getElementById('tg');
+    var btns = tg.querySelectorAll('button');
+    var secs = document.querySelectorAll('.sec');
+    function setLang(l){
+      btns.forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-lang')===l); });
+      secs.forEach(function(s){ s.classList.toggle('show', s.getAttribute('data-lang')===l); });
+      document.documentElement.lang = (l==='zh') ? 'zh' : 'en';
+      try{ localStorage.setItem('saltline.readme.lang', l); }catch(e){}
+    }
+    btns.forEach(function(b){
+      b.addEventListener('click', function(){ setLang(b.getAttribute('data-lang')); });
+    });
+    var saved = 'zh';
+    try{ saved = localStorage.getItem('saltline.readme.lang') || 'zh'; }catch(e){}
+    setLang(saved);
+  })();
+</script>
+</body>
+</html>

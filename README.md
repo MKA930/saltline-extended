@@ -1,6 +1,14 @@
-# Saltline · Extended（盐线 · 扩展版）
+# Saltline · Extended
 
 > 基于 Felix Rieseberg 在 Claude 上公开分享的作品《Saltline》做的本地化与功能扩展版，离线单文件、可直接部署到 GitHub Pages 在线运行。
+
+> ⚠️ **未完整测试，可能存在未知 bug**；中文与英文界面文本均为**机器翻译，可能不准确**。
+>
+> **已知问题：** 游戏内按 ESC / 点击「返回主菜单」无法退出到主菜单（暂未修复）。
+>
+> ⚠️ **Not fully tested — unknown bugs may exist**; both the Chinese and English UI texts are **machine-translated and may be inaccurate**.
+>
+> **Known issue:** in-game, pressing ESC / clicking "Back to menu" does not return to the main menu (not yet fixed).
 
 [🇨🇳 中文](#zh) &nbsp;·&nbsp; [🇺🇸 English](#en)
 

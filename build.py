@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 """以 Felix 原版为基底，挂接参考版的 V2~V9 扩展增量，并加入本地化层与无敌模式。
 
-2026-11 追加：手机端移动修复（mobile-fix.css）。
+2026-11 追加：手机端移动修复（mobile-fix.css / mobile-fix.js）、
+              暂停面板「返回主菜单」修复（menu-fix.js）。
+
+注意：BASE / REF 是本地未随仓库分发的构建基底，本脚本用于说明补丁如何复现；
+      仓库里的成品 index.html 由同一套注入规则产出。
 """
 import os
 
@@ -10,12 +14,14 @@ REF    = '_ref/aggie.html'             # 公开修改版，仅取增量
 I18N   = 'Saltline/i18n.source.js'
 FIXCSS = 'mobile-fix.css'              # 手机端移动修复样式
 FIXJS  = 'mobile-fix.js'               # 运行时手势兜底（不依赖 CSS）
+MENUJS = 'menu-fix.js'                 # 暂停面板「返回主菜单」修复
 OUT    = 'Saltline/index.html'
 
 orig = open(BASE, encoding='utf-8').read()
 ref  = open(REF,  encoding='utf-8').read()
 fixcss = open(FIXCSS, encoding='utf-8').read()
 fixjs = open(FIXJS, encoding='utf-8').read()
+menujs = open(MENUJS, encoding='utf-8').read()
 
 # 线上特有：国内访问 fonts.googleapis.com 会长时间挂起，渲染阻塞的
 # <link rel=stylesheet> 会推迟后续内联脚本执行，造成初始化时序差异 -> 改为非阻塞
@@ -56,6 +62,13 @@ ext, _n = _pat.subn(lambda m: "window.__saltlineSetWeapon('%s', %s);" % (m.group
 print('weapon setter shim:', _n, 'sites')
 assert _n >= 7, _n
 
+# 返回主菜单修复：扩展插入的按钮调了一个不存在的 game.toTitle()，改成走引擎状态机
+OLD = "b.addEventListener('click', () => { if (typeof game.toTitle === 'function') game.toTitle(); });"
+NEW = "b.addEventListener('click', () => { if (typeof window.__saltlineToTitle === 'function') window.__saltlineToTitle(); });"
+assert ext.count(OLD) == 1, '返回主菜单按钮回调锚点变化'
+assert ext.count(NEW) == 0
+ext = ext.replace(OLD, NEW, 1)
+
 # 无敌补丁：不扣血 + 不派发 player:dead（双保险，受击反馈保留）
 p1 = 'A.health=Math.max(0,A.health-J)'
 p2 = 'A.health<=0&&(A.alive=!1'
@@ -92,7 +105,8 @@ assert orig.count('</head>') == 1
 # 手机端移动修复 ③：补丁样式放在最后，确保覆盖扩展注入的 body{touch-action:manipulation}
 orig = orig.replace('</head>',
                     prelude + '\n' + style2 + '\n<style>\n' + fixcss + '\n</style>\n'
-                    + '<script>\n' + fixjs + '\n</script>\n</head>', 1)
+                    + '<script>\n' + fixjs + '\n</script>\n'
+                    + '<script>\n' + menujs + '\n</script>\n</head>', 1)
 
 i18n = open(I18N, encoding='utf-8').read()
 i18n = i18n.replace("let lang = 'en';", "let lang = 'zh';")

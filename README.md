@@ -4,15 +4,15 @@
 
 > ⚠️ **未完整测试，可能存在未知 bug**；中文与英文界面文本均为**机器翻译，可能不准确**。
 >
-> **已知问题：** 游戏内按 ESC / 点击「返回主菜单」无法退出到主菜单（暂未修复）。
+> **已知问题：** 暂无（原「ESC / 返回主菜单无法退出」已修复，见下方更新说明）。
 >
 > ⚠️ **Not fully tested — unknown bugs may exist**; both the Chinese and English UI texts are **machine-translated and may be inaccurate**.
 >
-> **Known issue:** in-game, pressing ESC / clicking "Back to menu" does not return to the main menu (not yet fixed).
+> **Known issue:** None (the former "Back to menu" issue has been fixed, see the update note below).
 >
-> ✅ **2026-11 更新：** 修复了移动端虚拟摇杆无法移动的问题。
+> ✅ **2026-11 更新：** 修复了移动端虚拟摇杆无法移动的问题；修复了暂停后点击「返回主菜单」无效的问题 —— 现在会直接结束当前对局并回到主菜单（ESC 仍为暂停 / 继续）。
 >
-> ✅ **Nov 2026 update:** Fixed the mobile virtual joystick not moving the player.
+> ✅ **Nov 2026 update:** Fixed the mobile virtual joystick not moving the player; fixed "Back to menu" not working while paused — it now ends the current run and returns to the main menu (ESC still pauses / resumes).
 
 [🇨🇳 中文](#zh) &nbsp;·&nbsp; [🇺🇸 English](#en)
 

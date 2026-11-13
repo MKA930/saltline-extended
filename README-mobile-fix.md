@@ -42,7 +42,7 @@ Chrome 手机模拟 390×844 + CDP 真实触摸事件：
 | 左半屏拖动的位移 | 2.19 | 3.42 | **3.445** |
 | 屏幕中央 (x=200) 的触摸目标 | `.t-btn.t-swap`（按钮吃掉） | `#view` | `#view` |
 
-v2 额外验证（同一脚本，**把 `body`/`#view` 强制改回 `manipulation` 模拟 CSS 完全失效**）：仍能移动、位移 3.408，诊断 `prevented=7 / blocked=0 / touchcancel=0`、命中 `view`、左半屏判定正确。真实 WebKit 引擎下 `body/html/#view/#app` 的 `touch-action` 计算值均为 `none`，页面 `position:fixed`、不可滚动。静态自检 15 项全 PASS。
+v2 额外验证（同一脚本，**把 `body`/`#view` 强制改回 `manipulation` 模拟 CSS 完全失效**）：仍能移动、位移 3.408，诊断 `prevented=7 / blocked=0 / touchcancel=0`、命中 `view`、左半屏判定正确。真实 WebKit 引擎下 `body/html/#view/#app` 的 `touch-action` 计算值均为 `none`，页面 `position:fixed`、不可滚动。静态自检全 PASS（当前 21 项，含返回主菜单修复断言）。
 
 ## 验证命令
 
@@ -57,4 +57,19 @@ python3 -m http.server 8898          # 本地起服务
 ## 部署
 
 - 直接用成品：把本目录 `index.html` 覆盖仓库根目录同名文件即可，单文件离线可跑，GitHub Pages 立即生效。
-- 从源码重建：`build.py` 已把 `mobile-fix.css` 作为输入并注入；它依赖原版 `Saltline/index.en.html` 与 `_ref/aggie.html`（精简交付里未包含）。
+- 从源码重建：`build.py` 已把 `mobile-fix.css` / `mobile-fix.js` / `menu-fix.js` 作为输入并注入；它依赖原版 `Saltline/index.en.html` 与 `_ref/aggie.html`（精简交付里未包含）。
+
+## 附带修复：暂停后「返回主菜单」无效
+
+扩展模块给暂停 / 阵亡 / 结算面板插入的「返回主菜单」按钮，点击回调是
+`if (typeof game.toTitle === 'function') game.toTitle();`，但引擎 `window.__G.game`
+从来没有 `toTitle` 方法（全文件仅此一处引用、零处定义），点击静默无操作；引擎内部
+状态切换函数也从未以 `'title'` 调用过，即原版没有回主菜单路径。
+
+`menu-fix.js` 提供 `window.__saltlineToTitle`：把 `game.state` 置为 `'title'` 并派发
+`game:state`（让各扩展模块清场 / 重置战绩 / 刷新标题页，主循环 `case "title"` 只跑
+标题相机动画、不再更新玩法），再复位标题页呈现（菜单 `show('title')`、隐藏 HUD 与武器、
+解除输入锁与音频暂停、清空摇杆残留）。ESC 保持原设计的暂停 / 继续。
+
+验证：暂停 → 点击「返回主菜单」→ `game.state === 'title'`、`menus.screen === 'title'`，
+且再点「开始行动」能正常重新开局。

@@ -49,7 +49,7 @@
   <!-- ===================== 中文 ===================== -->
   <section class="sec show" data-lang="zh">
     <p class="muted">⚠️ 未完整测试，可能存在未知 bug；中/英文均为机器翻译，可能不准确。<br><strong>已知问题：</strong>暂无（原「ESC / 返回主菜单无法退出」已修复，见下方更新说明）。</p>
-    <p class="muted">✅ 2026-11 更新：修复了移动端虚拟摇杆无法移动的问题；修复了暂停后点击「返回主菜单」无效的问题 —— 现在会直接结束当前对局并回到主菜单（ESC 仍为暂停 / 继续）。</p>
+    <p class="muted">✅ 2026-11 更新：修复了移动端虚拟摇杆无法移动的问题（真机 iOS 上引擎内部 <code>touch→move</code> 换算失效、向量恒为 0，改用 <code>stick-fix.js</code> 包装 <code>input.update</code> 直接写入摇杆向量绕开该链路）；修复了暂停后点击「返回主菜单」无效的问题 —— 现在会直接结束当前对局并回到主菜单（ESC 仍为暂停 / 继续）。</p>
     <h2>这是什么</h2>
     <p>《Saltline》是一款用纯 HTML / Three.js 实现的 3D 第一人称港务突防小游戏。本仓库在原版基础上：</p>
     <ul>
@@ -76,13 +76,20 @@
     <p>双击 <code>index.html</code> 即可离线运行（无需服务器、无需联网）。</p>
 
     <h2>从源码重新构建</h2>
-    <p><code>index.html</code> 由可复现脚本生成。本仓库为精简交付，只保留构建产物与构建脚本：</p>
-    <pre><code>python build.py            # 输出 index.html
+    <p><code>index.html</code> 由 <code>build.py</code> 从上游基底叠加本地化与修复脚本生成；本仓库为精简交付，<strong>直接提供已内联全部修复的成品 <code>index.html</code></strong>，并保留修复源码与构建脚本：</p>
+    <pre><code>python build.py            # 输出 index.html（需在含上游基底的环境中运行）
 node --check i18n.source.js   # 语法校验</code></pre>
     <ul>
-      <li><code>build.py</code>：以原版英文基底为 BASE，从参考版抽取第 2 个 <code>&lt;style&gt;</code> 与第 2 个 <code>&lt;script&gt;</code>（V2~V9 扩展增量），叠加语言切换 / 无敌模式 / 署名说明，并做品牌清理与扩展兼容性垫片。</li>
+      <li><code>build.py</code>：以原版英文基底为 BASE，从参考版抽取第 2 个 <code>&lt;style&gt;</code> 与第 2 个 <code>&lt;script&gt;</code>（V2~V9 扩展增量），叠加语言切换 / 无敌模式 / 署名说明，并做品牌清理与扩展兼容性垫片；随后在 <code>&lt;/head&gt;</code> 前注入以下移动端修复：
+        <ul>
+          <li><code>mobile-fix.css</code> / <code>mobile-fix.js</code>：禁默认手势 + 运行时 <code>preventDefault()</code> 兜底 + <code>?diag=1</code> 真机诊断浮层（左摇杆热区由 45% 放宽到 50%）；</li>
+          <li><code>stick-fix.js</code>：包装 <code>input.update</code>，引擎算完后用摇杆向量覆盖 <code>input.move</code>，绕开 iOS 上失效的引擎内部 <code>touch→move</code> 链路；</li>
+          <li><code>menu-fix.js</code>：暂停 / 阵亡 / 结算面板的「返回主菜单」改为走引擎状态机，直接结束对局回到主菜单。</li>
+        </ul>
+      </li>
       <li><code>i18n.source.js</code>：菜单 DOM 本地化层（中英双向字典 + 运行时 <code>MutationObserver</code> 监听），会被 <code>build.py</code> 内联进 <code>index.html</code>。</li>
     </ul>
+    <p class="muted">上游基底（原版英文 <code>Saltline/index.en.html</code>、参考二开版 <code>_ref/aggie.html</code>、本地化 <code>Saltline/i18n.source.js</code>）未随精简仓库分发，故 <code>build.py</code> 仅作文档化的注入配方；线上运行依赖已构建好的成品 <code>index.html</code>。</p>
 
     <h2>已知限制</h2>
     <p>原版把武器伤害 / 射速定义为只读 getter，「战场强化」中的伤害与射速升级无法写回原版引擎（弹匣容量、武器名可以）。这是原版引擎本身的限制，不影响九把枪切换、载具、空战与首领战。</p>
@@ -94,7 +101,7 @@ node --check i18n.source.js   # 语法校验</code></pre>
   <!-- ===================== English ===================== -->
   <section class="sec" data-lang="en">
     <p class="muted">⚠️ Not fully tested — unknown bugs may exist; both the Chinese and English UI texts are machine-translated and may be inaccurate.<br><strong>Known issue:</strong> None (the former "Back to menu" issue has been fixed, see the update note below).</p>
-    <p class="muted">✅ Nov 2026 update: Fixed the mobile virtual joystick not moving the player; fixed "Back to menu" not working while paused — it now ends the current run and returns to the main menu (ESC still pauses / resumes).</p>
+    <p class="muted">✅ Nov 2026 update: Fixed the mobile virtual joystick not moving the player (on real iOS the engine's internal touch→move conversion silently produced a zero vector; <code>stick-fix.js</code> now wraps <code>input.update</code> and writes the joystick vector directly, bypassing that broken path); fixed "Back to menu" not working while paused — it now ends the current run and returns to the main menu (ESC still pauses / resumes).</p>
     <h2>What this is</h2>
     <p><i>Saltline</i> is a 3D first-person port-breaching game built as a single HTML file with Three.js. This repository extends the original:</p>
     <ul>
@@ -121,13 +128,20 @@ node --check i18n.source.js   # 语法校验</code></pre>
     <p>Double-click <code>index.html</code> — it runs fully offline (no server, no network).</p>
 
     <h2>Rebuild from source</h2>
-    <p><code>index.html</code> is produced by a reproducible script. This repo ships a trimmed deliverable — only the build output and the build script:</p>
-    <pre><code>python build.py            # emits index.html
+    <p><code>index.html</code> is produced by <code>build.py</code> from the upstream base plus the localization and fix scripts. This repo ships a trimmed deliverable — it <strong>ships the pre-built <code>index.html</code> with all fixes already inlined</strong>, along with the fix sources and the build script:</p>
+    <pre><code>python build.py            # emits index.html (run in an environment that has the upstream base)
 node --check i18n.source.js   # syntax check</code></pre>
     <ul>
-      <li><code>build.py</code>: uses the original English base, extracts the 2nd <code>&lt;style&gt;</code> and 2nd <code>&lt;script&gt;</code> (the V2–V9 extension increment) from the reference build, layers on language switch / god mode / attribution, and applies debranding plus an extension-compatibility shim.</li>
+      <li><code>build.py</code>: uses the original English base, extracts the 2nd <code>&lt;style&gt;</code> and 2nd <code>&lt;script&gt;</code> (the V2–V9 extension increment) from the reference build, layers on language switch / god mode / attribution, and applies debranding plus an extension-compatibility shim; it then injects the following mobile fixes before <code>&lt;/head&gt;</code>:
+        <ul>
+          <li><code>mobile-fix.css</code> / <code>mobile-fix.js</code>: disabled default gestures + a runtime <code>preventDefault()</code> fallback + the <code>?diag=1</code> on-device diagnostic overlay (left joystick hot-zone widened from 45% to 50%);</li>
+          <li><code>stick-fix.js</code>: wraps <code>input.update</code> and overwrites <code>input.move</code> with the joystick vector after the engine finishes, bypassing the broken internal <code>touch→move</code> path on iOS;</li>
+          <li><code>menu-fix.js</code>: the "Back to menu" button on the pause / death / results panels is rerouted through the engine state machine, ending the run and returning to the main menu.</li>
+        </ul>
+      </li>
       <li><code>i18n.source.js</code>: the menu DOM localization layer (bidirectional CN/EN dictionary + runtime <code>MutationObserver</code>); <code>build.py</code> inlines it into <code>index.html</code>.</li>
     </ul>
+    <p class="muted">The upstream base (original English <code>Saltline/index.en.html</code>, reference second-dev <code>_ref/aggie.html</code>, localization <code>Saltline/i18n.source.js</code>) is not shipped in this trimmed repo, so <code>build.py</code> serves mainly as a documented injection recipe; the live build depends on the pre-built <code>index.html</code>.</p>
 
     <h2>Known limitations</h2>
     <p>The original defines weapon damage / fire-rate as read-only getters, so the "field upgrades" for damage and fire-rate cannot be written back to the original engine (magazine size and weapon name can). This is a limitation of the original engine and does not affect weapon switching, vehicles, air combat, or the boss fight.</p>

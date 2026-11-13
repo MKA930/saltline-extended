@@ -48,6 +48,28 @@ GitHub Pages 已开启，直接访问：
 
 双击 `index.html` 即可离线运行（无需服务器、无需联网）。
 
+### 文件结构
+
+```text
+saltline-extended/
+├── index.html              # 游戏主文件（构建成品，已内联全部修复）；双击即离线运行
+├── README.md               # 本说明（中英双语）
+├── readme.html             # 带语言切换按钮的双语说明页（GitHub Pages 直接服务）
+├── README-mobile-fix.md    # 移动端修复技术说明：根因 / 修复 / 验证
+├── build.py                # 可复现构建脚本：把上游基底 + 本地化 + 修复注入生成 index.html
+├── mobile-fix.css          # 移动端样式修复：禁默认手势、固定视口、禁滚动
+├── mobile-fix.js           # 运行时手势兜底 + ?diag=1 真机诊断浮层
+├── stick-fix.js            # 摇杆驱动：包装 input.update 直接写入移动向量（绕开 iOS 失效链路）
+├── menu-fix.js             # 暂停 / 阵亡 / 结算「返回主菜单」修复
+├── selfcheck.py            # 静态自检脚本：区分「0 命中」与「注入失效」
+├── i18n.source.js          # 菜单 DOM 本地化层（上游基底，build.py 内联用）
+├── assets/                 # 截图与预览图等静态资源
+├── docs/                   # 补充文档：README.md 导航、REPORT.md 改造记录
+├── LICENSE                 # MIT 许可
+├── .gitignore              # 忽略构建/运行时产物与系统/编辑器噪声
+└── .nojekyll               # 关闭 Pages 的 Jekyll 处理，按原始文件直接发布
+```
+
 ### 从源码重新构建
 
 `index.html` 由 `build.py` 从上游基底叠加本地化与修复脚本生成；本仓库为精简交付，**直接提供已内联全部修复的成品 `index.html`**，并保留修复源码与构建脚本：
@@ -104,6 +126,28 @@ GitHub Pages is enabled:
 ### Run locally
 
 Double-click `index.html` — it runs fully offline (no server, no network).
+
+### File structure
+
+```text
+saltline-extended/
+├── index.html              # The game (built artifact, all fixes inlined); double-click to run offline
+├── README.md               # This README (bilingual)
+├── readme.html             # Bilingual README with a language toggle button (served by GitHub Pages)
+├── README-mobile-fix.md    # Mobile-fix technical notes: root cause / fix / verification
+├── build.py                # Reproducible build script: injects the upstream base + localization + fixes into index.html
+├── mobile-fix.css          # Mobile style fixes: disable default gestures, fix viewport, disable scroll
+├── mobile-fix.js           # Runtime gesture fallback + ?diag=1 on-device diagnostic overlay
+├── stick-fix.js            # Joystick driver: wraps input.update and writes the move vector directly (bypasses the broken iOS touch→move path)
+├── menu-fix.js             # Pause / death / results "Back to menu" fix
+├── selfcheck.py            # Static self-check script: tells "0 hits" apart from "injection failure"
+├── i18n.source.js          # Menu DOM localization layer (upstream base, inlined by build.py)
+├── assets/                 # Screenshots and preview images
+├── docs/                   # Supplementary docs: README.md index, REPORT.md build notes
+├── LICENSE                 # MIT license
+├── .gitignore              # Ignore build/runtime artifacts and OS/editor noise
+└── .nojekyll               # Disable Pages' Jekyll processing; publish raw files as-is
+```
 
 ### Rebuild from source
 

@@ -86,10 +86,16 @@
         var mv = inp && inp.move;
         d.move = mv ? (mv.x.toFixed(2) + ', ' + mv.y.toFixed(2)) : 'n/a';
         d.innerWidth = innerWidth;
+        // v3 摇杆包装器状态 + 我们的摇杆向量 S —— 真机验证移动修复的关键
+        var S = window.__saltlineStick;
+        d.stick = S ? ('x=' + (+S.x).toFixed(2) + ' y=' + (+S.y).toFixed(2) + ' act=' + S.active) : 'n/a';
+        var w = inp && inp.update && inp.update.__saltlineWrapped;
+        d.wrapped = w;
         box.textContent =
           'innerWidth=' + d.innerWidth + '  hasTouch=' + hasTouch + '\n' +
           'body TA=' + d.bodyTA + '  #view TA=' + d.viewTA + '\n' +
           'input.touch=' + d.touchMode + '  input.move=' + d.move + '\n' +
+          'stick=' + d.stick + '  wrapped=' + d.wrapped + '\n' +
           'x,y=' + d.x + ',' + d.y + '  leftHalf=' + d.left + '\n' +
           'event.target=' + d.hit + '\n' +
           'elementFromPoint=' + d.hitEl + '\n' +

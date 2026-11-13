@@ -13,7 +13,8 @@ BASE   = 'Saltline/index.en.html'      # 原版（抓取自 Claude artifact 的�
 REF    = '_ref/aggie.html'             # 公开修改版，仅取增量
 I18N   = 'Saltline/i18n.source.js'
 FIXCSS = 'mobile-fix.css'              # 手机端移动修复样式
-FIXJS  = 'mobile-fix.js'               # 运行时手势兜底（不依赖 CSS）
+FIXJS  = 'mobile-fix.js'               # 运行时手势兜底（不依赖 CSS）+ ?diag=1 诊断浮层
+STICKJS= 'stick-fix.js'               # v3：左半屏摇杆→input.update 包装器（绕开引擎内部 touch→move 失效）
 MENUJS = 'menu-fix.js'                 # 暂停面板「返回主菜单」修复
 OUT    = 'Saltline/index.html'
 
@@ -21,6 +22,7 @@ orig = open(BASE, encoding='utf-8').read()
 ref  = open(REF,  encoding='utf-8').read()
 fixcss = open(FIXCSS, encoding='utf-8').read()
 fixjs = open(FIXJS, encoding='utf-8').read()
+stickjs = open(STICKJS, encoding='utf-8').read()
 menujs = open(MENUJS, encoding='utf-8').read()
 
 # 线上特有：国内访问 fonts.googleapis.com 会长时间挂起，渲染阻塞的
@@ -106,7 +108,8 @@ assert orig.count('</head>') == 1
 orig = orig.replace('</head>',
                     prelude + '\n' + style2 + '\n<style>\n' + fixcss + '\n</style>\n'
                     + '<script>\n' + fixjs + '\n</script>\n'
-                    + '<script>\n' + menujs + '\n</script>\n</head>', 1)
+                    + '<script>\n' + menujs + '\n</script>\n'
+                    + '<script>\n' + stickjs + '\n</script>\n</head>', 1)
 
 i18n = open(I18N, encoding='utf-8').read()
 i18n = i18n.replace("let lang = 'en';", "let lang = 'zh';")

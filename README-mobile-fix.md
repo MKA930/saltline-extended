@@ -16,27 +16,33 @@
 
 两个叠加问题：V3/V9 新增的 `.t-swap` / `.t-flare` 在 390px 竖屏下用 `right:162px`，按钮左边缘落在 x≈180 的屏幕中线且 `pointer-events:auto`，按屏幕中间只会换枪、不会移动；摇杆热区又只有左 45%。
 
-## 最终修复（3 处）
+## 最终修复（v2）
 
 | # | 位置 | 改动 |
 |---|---|---|
-| 1 | `mobile-fix.css` | `html, body, #app, #view` 全链 `touch-action: none !important`，覆盖冲突规则 |
-| 2 | `mobile-fix.css` | 竖屏 ≤520px 把 `.t-swap` / `.t-flare` 收回右侧，不再侵占左半屏 |
-| 3 | `index.html` / `build.py` | 摇杆判定 `innerWidth*.45` → `innerWidth*.5`，左右正好分屏 |
+| 1 | `mobile-fix.css` | `html, body, #app, #view` 全链 `touch-action: none !important` |
+| 2 | `mobile-fix.css` | `#app, #app *, canvas` 命中链全覆盖（WebKit 看命中元素本身） |
+| 3 | `mobile-fix.css` | `html, body` 固定定位 + `overflow:hidden`，消除 iOS 橡皮筋 / 下拉刷新 |
+| 4 | `mobile-fix.js` | window 捕获阶段 `passive:false` 对游戏区域 `preventDefault()`，不依赖 CSS 兜底 |
+| 5 | `index.html` / `build.py` | Google Fonts 样式表改为 `media="print" onload` 非阻塞，消除线上初始化时序差异 |
+| 6 | `mobile-fix.css` | 竖屏 ≤520px 把 `.t-swap` / `.t-flare` 收回右侧，不侵占左半屏 |
+| 7 | `index.html` / `build.py` | 摇杆判定 `innerWidth*.45` → `innerWidth*.5`，左右正好分屏 |
 
-没有改动游戏逻辑、事件绑定和本地化层。
+没有改动游戏逻辑、事件绑定和本地化层。`?diag=1` 提供真机诊断浮层。
 
 ## 实测对照
 
-Chrome 手机模拟 390×844 + CDP 真实触摸事件，同一脚本跑原版与修复版：
+Chrome 手机模拟 390×844 + CDP 真实触摸事件：
 
-| 指标 | 原版 | 修复版 |
-|---|---|---|
-| `touchstart` / `touchmove` 的 `cancelable` | `false` | `true` |
-| `preventDefault` 被忽略报错 | 8 条 | **0 条** |
-| `body` 计算后的 `touch-action` | `manipulation` | `none` |
-| 左半屏拖动的位移 | 2.19 | **3.42** |
-| 屏幕中央 (x=200) 的触摸目标 | `.t-btn.t-swap`（按钮吃掉） | `#view`（穿透到画布） |
+| 指标 | v1 原版 | v1 修复 | v2 线上加固 |
+|---|---|---|---|
+| `touchstart` / `touchmove` 的 `cancelable` | `false` | `true` | `true` |
+| `preventDefault` 被忽略报错 | 8 条 | 0 条 | **0 条** |
+| `body` 计算后的 `touch-action` | `manipulation` | `none` | `none` |
+| 左半屏拖动的位移 | 2.19 | 3.42 | **3.445** |
+| 屏幕中央 (x=200) 的触摸目标 | `.t-btn.t-swap`（按钮吃掉） | `#view` | `#view` |
+
+v2 额外验证（同一脚本，**把 `body`/`#view` 强制改回 `manipulation` 模拟 CSS 完全失效**）：仍能移动、位移 3.408，诊断 `prevented=7 / blocked=0 / touchcancel=0`、命中 `view`、左半屏判定正确。真实 WebKit 引擎下 `body/html/#view/#app` 的 `touch-action` 计算值均为 `none`，页面 `position:fixed`、不可滚动。静态自检 15 项全 PASS。
 
 ## 验证命令
 

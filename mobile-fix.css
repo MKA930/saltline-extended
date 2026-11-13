@@ -1,6 +1,6 @@
-/* Saltline · 手机端移动修复
+/* Saltline · 手机端移动修复（v2：线上 / iOS WebKit 加固）
  *
- * 根因：扩展 V6「手机触屏修复」给 body 注入了 touch-action: manipulation。
+ * v1 根因：扩展 V6「手机触屏修复」给 body 注入了 touch-action: manipulation。
  * 该值明确允许平移 / 双指缩放，浏览器从 touchstart 起就进入滚动手势，
  * iOS Safari / 微信 WebView 会接管 touchmove，使原版 canvas 上 passive:false 的
  * preventDefault() 失效（事件 cancelable=false），表现为角色不走、拖动断续。
@@ -14,6 +14,23 @@ html, body, #app, #view {
   overscroll-behavior: none !important;
 }
 html, body { -webkit-overflow-scrolling: auto !important; }
+
+/* v2 加固：线上 https 是可滚动文档（本地 file:// 预览不是），iOS Safari /
+   iOS Chrome 同为 WebKit，手势判定比桌面 Chrome 更早、更依赖「命中元素」自身
+   的 touch-action。只压 body/html 不够，整棵游戏 DOM 树都要禁默认手势。 */
+#app, #app *, canvas {
+  touch-action: none !important;
+  -webkit-touch-callout: none !important;
+}
+/* iOS Safari 即使 overflow:hidden 也可能触发橡皮筋 / 下拉刷新，需固定视口 */
+html, body {
+  position: fixed !important;
+  left: 0 !important; top: 0 !important; right: 0 !important; bottom: 0 !important;
+  width: 100% !important; height: 100% !important;
+  overflow: hidden !important;
+}
+/* 菜单里可滚动的说明块保留纵向手势，其余一律禁止 */
+#app .m-callout-body { touch-action: pan-y !important; }
 
 /* 390px 级竖屏：.t-swap / .t-flare 原本用 right:162px，
    按钮左边缘落在 x≈180，正好在屏幕中线且 pointer-events:auto，

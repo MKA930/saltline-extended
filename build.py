@@ -9,11 +9,21 @@ BASE   = 'Saltline/index.en.html'      # 原版（抓取自 Claude artifact 的�
 REF    = '_ref/aggie.html'             # 公开修改版，仅取增量
 I18N   = 'Saltline/i18n.source.js'
 FIXCSS = 'mobile-fix.css'              # 手机端移动修复样式
+FIXJS  = 'mobile-fix.js'               # 运行时手势兜底（不依赖 CSS）
 OUT    = 'Saltline/index.html'
 
 orig = open(BASE, encoding='utf-8').read()
 ref  = open(REF,  encoding='utf-8').read()
 fixcss = open(FIXCSS, encoding='utf-8').read()
+fixjs = open(FIXJS, encoding='utf-8').read()
+
+# 线上特有：国内访问 fonts.googleapis.com 会长时间挂起，渲染阻塞的
+# <link rel=stylesheet> 会推迟后续内联脚本执行，造成初始化时序差异 -> 改为非阻塞
+import re as _reFont
+_fm = _reFont.search(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^>]*>', orig)
+assert _fm, 'font stylesheet link missing'
+orig = orig[:_fm.start()] + _fm.group(0).replace(
+    '<link ', '<link media="print" onload="this.media=\'all\'" ') + orig[_fm.end():]
 
 # 参考版的第 2 个 <style> 与第 2 个 <script> 就是全部扩展增量
 s2 = ref.find('<style>', 31000);  e2 = ref.find('</style>', s2) + len('</style>')
@@ -81,7 +91,8 @@ prelude = (
 assert orig.count('</head>') == 1
 # 手机端移动修复 ③：补丁样式放在最后，确保覆盖扩展注入的 body{touch-action:manipulation}
 orig = orig.replace('</head>',
-                    prelude + '\n' + style2 + '\n<style>\n' + fixcss + '\n</style>\n</head>', 1)
+                    prelude + '\n' + style2 + '\n<style>\n' + fixcss + '\n</style>\n'
+                    + '<script>\n' + fixjs + '\n</script>\n</head>', 1)
 
 i18n = open(I18N, encoding='utf-8').read()
 i18n = i18n.replace("let lang = 'en';", "let lang = 'zh';")

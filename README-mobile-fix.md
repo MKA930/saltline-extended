@@ -1,5 +1,9 @@
 # Saltline Extended · 手机端无法移动 修复说明
 
+> **v2（线上 / iOS WebKit 加固）**：v1 的 CSS 补丁在「本地直接打开 `index.html`」时有效，但线上 GitHub Pages 上 iOS Safari / iOS Chrome（同为 WebKit）仍无法移动。三个 URL 抓取结果 sha256 一致且 `X-Cache: MISS`，**排除缓存**；差异来自在线页面是可滚动文档、WebKit 手势判定更早且更依赖命中元素自身的 `touch-action`，以及一个会渲染阻塞的 Google Fonts 请求。v2 增加：整棵游戏 DOM 树禁默认手势、`html/body` 固定定位消除橡皮筋、`mobile-fix.js` 在捕获阶段 `preventDefault()` 做不依赖 CSS 的运行时兜底、外部字体改为非阻塞。
+>
+> 真机自查：访问 `https://MKA930.github.io/saltline-extended/?diag=1`，左上角浮层会实时显示 `body/#view` 的 `touch-action`、`input.touch` / `input.move`、触摸坐标与左半屏判定、命中元素、以及 `prevented/blocked/touchcancel` 计数。
+
 ## 现象
 
 手机浏览器打开游戏，点「开始行动」后按住屏幕拖动，角色不走或拖动断续。

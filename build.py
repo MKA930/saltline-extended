@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
-"""以 Felix 原版为基底，挂接参考版的 V2~V9 扩展增量，并加入本地化层与无敌模式。"""
+"""以 Felix 原版为基底，挂接参考版的 V2~V9 扩展增量，并加入本地化层与无敌模式。
+
+2026-11 追加：手机端移动修复（mobile-fix.css）。
+"""
 import os
 
 BASE   = 'Saltline/index.en.html'      # 原版（抓取自 Claude artifact 的纯净英文版）
 REF    = '_ref/aggie.html'             # 公开修改版，仅取增量
 I18N   = 'Saltline/i18n.source.js'
+FIXCSS = 'mobile-fix.css'              # 手机端移动修复样式
 OUT    = 'Saltline/index.html'
 
 orig = open(BASE, encoding='utf-8').read()
 ref  = open(REF,  encoding='utf-8').read()
+fixcss = open(FIXCSS, encoding='utf-8').read()
 
 # 参考版的第 2 个 <style> 与第 2 个 <script> 就是全部扩展增量
 s2 = ref.find('<style>', 31000);  e2 = ref.find('</style>', s2) + len('</style>')
@@ -48,6 +53,15 @@ assert orig.count(p1) == 1 and orig.count(p2) == 1
 orig = orig.replace(p1, 'A.health=window.__saltlineGod?A.health:Math.max(0,A.health-J)', 1)
 orig = orig.replace(p2, 'A.health<=0&&!window.__saltlineGod&&(A.alive=!1', 1)
 
+# 手机端移动修复 ①：左摇杆热区由 45% 放宽到 50%（左右正好分屏）
+anchor = 'innerWidth*.45'
+assert orig.count(anchor) == 1, 'innerWidth*.45 anchor missing/changed'
+orig = orig.replace(anchor, 'innerWidth*.5', 1)
+
+# 手机端移动修复 ②：自检上游仍含那条会破坏触摸的 CSS，避免「0 命中」被当成成功
+assert style2.count('body { touch-action: manipulation; }') == 1, \
+    'upstream touch-action rule changed, review mobile-fix.css'
+
 # 原版把 weapon.name/damage/rpm/magSize 定义成不可配置的只读 getter，
 # 参考扩展直接赋值会在严格模式下抛 TypeError 并中断 refreshWeapon。
 # 这里给扩展的赋值加一层安全写入：能写就写，写不了就落到 b.slot（name / magSize）。
@@ -65,7 +79,9 @@ prelude = (
     '</script>'
 )
 assert orig.count('</head>') == 1
-orig = orig.replace('</head>', prelude + '\n' + style2 + '\n</head>', 1)
+# 手机端移动修复 ③：补丁样式放在最后，确保覆盖扩展注入的 body{touch-action:manipulation}
+orig = orig.replace('</head>',
+                    prelude + '\n' + style2 + '\n<style>\n' + fixcss + '\n</style>\n</head>', 1)
 
 i18n = open(I18N, encoding='utf-8').read()
 i18n = i18n.replace("let lang = 'en';", "let lang = 'zh';")

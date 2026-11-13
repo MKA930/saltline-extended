@@ -1,0 +1,24 @@
+/* Saltline · 手机端移动修复
+ *
+ * 根因：扩展 V6「手机触屏修复」给 body 注入了 touch-action: manipulation。
+ * 该值明确允许平移 / 双指缩放，浏览器从 touchstart 起就进入滚动手势，
+ * iOS Safari / 微信 WebView 会接管 touchmove，使原版 canvas 上 passive:false 的
+ * preventDefault() 失效（事件 cancelable=false），表现为角色不走、拖动断续。
+ * 原版 `#view { touch-action: none }` 只作用于 canvas，压不住 body 上的手势决策。
+ *
+ * 修复：整条手势链都禁止平移缩放，恢复原版语义；并把竖屏下被推到屏幕中线的
+ * V3/V9 触屏按钮收回右侧，避免占用左半屏摇杆热区。
+ */
+html, body, #app, #view {
+  touch-action: none !important;
+  overscroll-behavior: none !important;
+}
+html, body { -webkit-overflow-scrolling: auto !important; }
+
+/* 390px 级竖屏：.t-swap / .t-flare 原本用 right:162px，
+   按钮左边缘落在 x≈180，正好在屏幕中线且 pointer-events:auto，
+   按中间只会换枪 / 放干扰弹，不会移动。移回右侧角落。 */
+@media (orientation: portrait) and (max-width: 520px) {
+  .touch .t-swap { right: calc(92px + var(--sar)) !important; }
+  .touch .t-flare { right: calc(96px + var(--sar)) !important; }
+}

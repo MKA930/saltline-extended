@@ -9,6 +9,10 @@
 > ⚠️ **Not fully tested — unknown bugs may exist**; both the Chinese and English UI texts are **machine-translated and may be inaccurate**.
 >
 > **Known issue:** in-game, pressing ESC / clicking "Back to menu" does not return to the main menu (not yet fixed).
+>
+> ✅ **2026-11 更新：** 修复了移动端虚拟摇杆无法移动的问题。
+>
+> ✅ **Nov 2026 update:** Fixed the mobile virtual joystick not moving the player.
 
 [🇨🇳 中文](#zh) &nbsp;·&nbsp; [🇺🇸 English](#en)
 
